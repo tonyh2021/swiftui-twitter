@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct ProfileView: View {
+    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    
+    @State private var selectedFilter: TweetFilter = .tweets
+    @Namespace var animation
+    
     var body: some View {
         VStack(alignment: .leading) {
             headerView
@@ -16,7 +22,9 @@ struct ProfileView: View {
             
             userInfoView
             
+            filterBar
             
+            tweetsView
             
             Spacer()
         }
@@ -24,6 +32,47 @@ struct ProfileView: View {
 }
 
 extension ProfileView {
+    
+    private var tweetsView: some View {
+        ScrollView {
+            LazyVStack {
+                ForEach(0...9, id: \.self) { _ in
+                    TweetRowView()
+                        .padding()
+                }
+            }
+        }
+    }
+    
+    private var filterBar: some View {
+        HStack {
+            ForEach(TweetFilter.allCases, id: \.rawValue) { item in
+                VStack {
+                    Text(item.title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(selectedFilter == item ? .black : .gray)
+                    
+                    if selectedFilter == item {
+                        Capsule()
+                            .foregroundColor(Color(.systemBlue))
+                            .frame(height: 3)
+                            .matchedGeometryEffect(id: "filter", in: animation)
+                    } else {
+                        Capsule()
+                            .foregroundColor(Color(.clear))
+                            .frame(height: 3)
+                    }
+                    
+                }
+                .onTapGesture {
+                    withAnimation(.easeInOut) {
+                        self.selectedFilter = item
+                    }
+                }
+            }
+        }
+    }
     
     private var userInfoView: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -56,25 +105,8 @@ extension ProfileView {
             .font(.caption)
             .foregroundColor(.gray)
             
-            HStack(spacing: 24) {
-                HStack {
-                    Text("89")
-                        .font(.subheadline)
-                        .bold()
-                    Text("Following")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                HStack {
-                    Text("6.4M")
-                        .font(.subheadline)
-                        .bold()
-                    Text("Followers")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-            }
-            .padding(.vertical)
+            UserStatsView()
+                .padding(.vertical)
             
         }
         .padding(.horizontal)
@@ -115,14 +147,13 @@ extension ProfileView {
                 .ignoresSafeArea()
             VStack {
                 Button {
-                    print("tapped...")
-                    
+                    presentationMode.wrappedValue.dismiss()
                 } label: {
                     Image(systemName: "arrow.left")
                         .resizable()
                         .frame(width: 20, height: 16)
                         .foregroundColor(.white)
-                        .offset(x: 16, y: 12)
+                        .offset(x: 0, y: 10)
                 }
                 
                 Circle()
@@ -136,6 +167,8 @@ extension ProfileView {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
+        NavigationView {
+            ProfileView()
+        }
     }
 }

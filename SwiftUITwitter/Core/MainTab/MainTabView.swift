@@ -37,7 +37,7 @@ struct MainTabView: View {
                     Image(systemName: "bell")
                 }
                 .tag(2)
-            MessagesView()
+            ProfileView()
                 .onTapGesture {
                     self.selected = 3
                 }
